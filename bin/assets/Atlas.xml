@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://texturepacker.com-->
+<!-- $TexturePacker:SmartUpdate:df7727a4b703f662ec85dbc3883a0f8b$ -->
+<TextureAtlas imagePath="Atlas.png">
+    <SubTexture name="Background" x="0" y="0" width="480" height="640"/>
+    <SubTexture name="EnemyBullet" x="0" y="939" width="12" height="30"/>
+    <SubTexture name="EnemySpaceship" x="0" y="641" width="85" height="69"/>
+    <SubTexture name="EnemySpaceship_Hit" x="0" y="711" width="85" height="69"/>
+    <SubTexture name="LaserPickup0001" x="141" y="851" width="34" height="34"/>
+    <SubTexture name="LaserPickup0002" x="141" y="816" width="34" height="34"/>
+    <SubTexture name="LaserPickup0003" x="141" y="781" width="34" height="34"/>
+    <SubTexture name="LaserPickup0004" x="121" y="746" width="34" height="34"/>
+    <SubTexture name="LaserPickup0005" x="121" y="711" width="34" height="34"/>
+    <SubTexture name="LaserPickup0006" x="121" y="676" width="34" height="34"/>
+    <SubTexture name="LaserPickup0007" x="121" y="641" width="34" height="34"/>
+    <SubTexture name="LaserPickup0008" x="140" y="956" width="34" height="34"/>
+    <SubTexture name="LaserPickup0009" x="120" y="921" width="34" height="34"/>
+    <SubTexture name="LaserPickup0010" x="120" y="886" width="34" height="34"/>
+    <SubTexture name="LaserPickup0011" x="106" y="851" width="34" height="34"/>
+    <SubTexture name="LaserPickup0012" x="106" y="816" width="34" height="34"/>
+    <SubTexture name="LaserPickup0013" x="106" y="781" width="34" height="34"/>
+    <SubTexture name="LaserPickup0014" x="86" y="746" width="34" height="34"/>
+    <SubTexture name="LaserPickup0015" x="86" y="711" width="34" height="34"/>
+    <SubTexture name="Particle" x="105" y="991" width="31" height="31"/>
+    <SubTexture name="PlayerBullet" x="0" y="899" width="12" height="30"/>
+    <SubTexture name="PlayerSpaceship" x="0" y="781" width="70" height="58"/>
+    <SubTexture name="PlayerSpaceship_Hit" x="0" y="840" width="70" height="58"/>
+    <SubTexture name="ShieldPickup0001" x="86" y="676" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0002" x="86" y="641" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0003" x="105" y="956" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0004" x="85" y="921" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0005" x="85" y="886" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0006" x="71" y="851" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0007" x="71" y="816" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0008" x="71" y="781" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0009" x="70" y="969" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0010" x="50" y="934" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0011" x="50" y="899" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0012" x="35" y="969" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0013" x="15" y="934" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0014" x="15" y="899" width="34" height="34"/>
+    <SubTexture name="ShieldPickup0015" x="0" y="979" width="34" height="34"/>
+    <SubTexture name="Star" x="0" y="1014" width="4" height="4"/>
+</TextureAtlas>

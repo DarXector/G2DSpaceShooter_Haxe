@@ -1,0 +1,20 @@
+# Include sources
+-cp context/common/src
+-cp context/html/src
+-cp core/src
+-cp examples/haxe/src
+
+# Include libraries
+-lib msignal
+-lib actuate
+
+# Genome2D flags
+-D webGLonly
+-D html5
+
+# Main class
+#-main examples.ExampleWrapper
+-main Main
+
+# JavaScript flags
+-js ../bin/G2DSpaceShooter.js

@@ -1,0 +1,31 @@
+# Include sources
+-cp context/flash/src
+-cp context/common/src
+-cp core/src
+-cp examples/haxe/src
+
+# Include libraries
+-lib msignal
+-lib actuate
+-swf-lib context/flash/lib/AGAL.swc
+
+# Debug flags
+-D fdb
+-debug
+-D advanced-telemetry
+
+# Genome2D flags
+-D stage3Donly
+
+# Haxe flags
+#--no-inline
+#--no-traces
+
+# Main class
+-main Main
+#-main benchmark.BunnyMark
+
+# Flash flags
+-swf-version 12.0
+-swf ../bin/G2DSpaceShooter.swf
+-swf-header 480:600:60:000000
