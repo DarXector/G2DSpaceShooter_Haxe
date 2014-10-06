@@ -9,4 +9,4 @@ Rewritten in Haxe and updated to work with the latest version of Genome2D.
 Updated to comply with my general way of orginizing the code.
 I moved further from the tutorial with game features and will not stop here.
 
-The code is not yet commented it is on my TODO list.
+The code is not yet commented. This is on my TODO list.
