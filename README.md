@@ -10,8 +10,11 @@ Updated to comply with my general way of orginizing the code.
 I moved further from the tutorial with game features and will not stop here.
 
 This code is dependent on Genome2D Core, and Flash and HTML context libraries:
+
 https://github.com/pshtif/Genome2D-Core
+
 https://github.com/pshtif/Genome2D-ContextFlash
+
 https://github.com/pshtif/Genome2D-ContextHTML
 
 The code is not yet commented. This is on my TODO list.
