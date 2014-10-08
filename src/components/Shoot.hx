@@ -7,7 +7,7 @@ import com.genome2d.signals.GMouseSignalType;
 import com.genome2d.signals.GMouseSignal;
 import com.genome2d.Genome2D;
 import com.genome2d.textures.GTexture;
-import model.Registry;
+import model.AppModel;
 import model.ModelLocator;
 import com.genome2d.components.GComponent;
 
@@ -16,7 +16,7 @@ class Shoot extends GComponent
     private var _intervalTime:Int = 10;
     private var _delay:Int;
     private var _mouseDown:Bool;
-    private var _registry:Registry;
+    private var _model:AppModel;
     private var _texture:GTexture;
     private var _owner:String;
     public var canFire:Bool;
@@ -25,7 +25,7 @@ class Shoot extends GComponent
     {
         super();
 
-        _registry = ModelLocator.instance().registry;
+        _model = ModelLocator.instance().model;
 
         Genome2D.getInstance().getContext().onMouseSignal.add(_onMouse);
     }
@@ -82,8 +82,8 @@ class Shoot extends GComponent
     {
         _delay = _intervalTime;
 
-        var b = new Bullet(_owner, _registry, _texture, this.node.transform.x - 10, this.node.transform.y);
-        var c = new Bullet(_owner, _registry, _texture, this.node.transform.x + 14, this.node.transform.y);
+        var b = new Bullet(_owner, _model, _texture, this.node.transform.x - 10, this.node.transform.y);
+        var c = new Bullet(_owner, _model, _texture, this.node.transform.x + 14, this.node.transform.y);
     }
 
     private function _onDestroyed():Void

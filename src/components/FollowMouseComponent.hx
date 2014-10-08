@@ -16,7 +16,7 @@ class FollowMouseComponent extends GComponent
     public function new()
     {
         super();
-        _viewRect = ModelLocator.instance().registry.viewRect;
+        _viewRect = ModelLocator.instance().model.viewRect;
         _stage = Genome2D.getInstance().getContext().getNativeStage();
     }
 

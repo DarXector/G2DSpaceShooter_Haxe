@@ -1,6 +1,6 @@
 package states;
 
-import model.Registry;
+import model.AppModel;
 import com.genome2d.node.factory.GNodeFactory;
 import com.genome2d.components.renderables.GSprite;
 import msignal.Signal.Signal1;
@@ -17,16 +17,16 @@ import com.genome2d.node.GNode;
 class StartState extends GNode
 {
     private var _onPlay:Signal1<GNode>;
-    private var _registry:Registry;
+    private var _model:AppModel;
 
     public function new()
     {
         super('start_state');
 
         var assets = ModelLocator.instance().assets;
-        _registry = ModelLocator.instance().registry;
+        _model = ModelLocator.instance().model;
 
-        _registry.createText(this, -50, -260, assets.font, "Genome2D \nSpace-Shooter Tutorial \nHAXE", _registry.viewRect.width, 200, GVAlignType.MIDDLE, GHAlignType.CENTER, 0);
+        _model.createText(this, -50, -260, assets.font, "Genome2D \nSpace-Shooter Tutorial \nHAXE", _model.viewRect.width, 200, GVAlignType.MIDDLE, GHAlignType.CENTER, 0);
 
         var play:GSprite = cast GNodeFactory.createNodeWithComponent(GSprite);
         play.texture = assets.atlas.getSubTexture('PlayerSpaceship');
@@ -38,6 +38,6 @@ class StartState extends GNode
 
     private function _onPlayClick(s:GNodeMouseSignal):Void
     {
-        _registry.changeState(GameState);
+        _model.changeState(GameState);
     }
 }

@@ -1,6 +1,6 @@
 package components;
 import com.genome2d.geom.GRectangle;
-import model.Registry;
+import model.AppModel;
 import model.ModelLocator;
 import com.genome2d.components.GComponent;
 
@@ -13,7 +13,7 @@ class BackgroundMovement extends GComponent
     {
         super();
 
-        _viewRect =  ModelLocator.instance().registry.viewRect;
+        _viewRect =  ModelLocator.instance().model.viewRect;
 
     }
     override public function init():Void

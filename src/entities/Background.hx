@@ -15,7 +15,7 @@ class Background extends GNode
         super('background_stars');
 
         var assets = ModelLocator.instance().assets;
-        var registry = ModelLocator.instance().registry;
+        var model = ModelLocator.instance().model;
 
         graphics1 = cast GNodeFactory.createNodeWithComponent(GSprite, 'bg_graphics');
         graphics1.texture = assets.atlas.getSubTexture('Background');
@@ -25,7 +25,7 @@ class Background extends GNode
         graphics2.texture = assets.atlas.getSubTexture('Background');
         addChild(graphics2.node);
 
-        graphics2.node.transform.y = -registry.viewRect.height;
+        graphics2.node.transform.y = -model.viewRect.height;
 
         addComponent(BackgroundMovement);
     }

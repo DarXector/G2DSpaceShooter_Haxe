@@ -8,13 +8,13 @@ import com.genome2d.components.renderables.particles.GSimpleParticleSystem;
 import com.genome2d.components.renderables.GSprite;
 import entities.EnemyShip;
 import model.ModelLocator;
-import model.Registry;
+import model.AppModel;
 import com.genome2d.components.GComponent;
 
 class EnemyShipComponent extends GComponent
 {
     private var _speed:Float = 0.2;
-    private var _registry:Registry;
+    private var _model:AppModel;
     private var _assets:Assets;
     private var _viewRect:GRectangle;
     private var _shipGraphic:GSprite;
@@ -29,9 +29,9 @@ class EnemyShipComponent extends GComponent
     {
         super();
 
-        _registry = ModelLocator.instance().registry;
+        _model = ModelLocator.instance().model;
         _assets = ModelLocator.instance().assets;
-        _viewRect = _registry.viewRect;
+        _viewRect = _model.viewRect;
     }
 
     override public function init():Void
@@ -54,7 +54,7 @@ class EnemyShipComponent extends GComponent
 
         if(!_exploding)
         {
-            for(bullet in _registry.playerBullets)
+            for(bullet in _model.playerBullets)
             {
                 if(bullet.graphics.hitTestPoint(nodeX, nodeY, false, 20, 20))
                 {
@@ -64,10 +64,10 @@ class EnemyShipComponent extends GComponent
             }
         }
 
-        if(!_exploding && !_registry.playerComponent.exploding
-        && _registry.player.graphics.hitTestPoint(nodeX, nodeY, false, 20, 20))
+        if(!_exploding && !_model.playerComponent.exploding
+        && _model.player.graphics.hitTestPoint(nodeX, nodeY, false, 20, 20))
         {
-            _registry.playerComponent.explode();
+            _model.playerComponent.explode();
             explode();
         }
 
@@ -96,15 +96,7 @@ class EnemyShipComponent extends GComponent
 
     public function remove():Void
     {
-        _registry.gameState.removeChild(this.node);
-        for(enemy in _registry.enemies)
-        {
-            if(enemy == this.node)
-            {
-                _registry.enemies.remove(enemy);
-                break;
-            }
-        }
+        _model.removeEnemy(cast this.node);
 
         cast(node.getComponent(Shoot), Shoot).canFire = false;
         node.core.onUpdate.remove(_update);

@@ -23,8 +23,6 @@ class Player extends GNode
 
         var assets = ModelLocator.instance().assets;
 
-        ModelLocator.instance().registry.player = this;
-
         booster = cast GNodeFactory.createNodeWithComponent(GSimpleParticleSystem, 'booster_emitter');
         booster.texture = assets.atlas.getSubTexture("Particle");
         booster.emit = true;
@@ -61,5 +59,6 @@ class Player extends GNode
         this.addComponent(Shoot);
         this.addComponent(PlayerShipComponent);
 
+        ModelLocator.instance().model.setPlayer(this);
     }
 }

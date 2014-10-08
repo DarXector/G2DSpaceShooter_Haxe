@@ -9,7 +9,7 @@ package model;
 
 class ModelLocator
 {
-	public var registry:Registry = new Registry();
+	public var model:AppModel = new AppModel();
 	public var assets:Assets = new Assets();
 	private static var _instance:ModelLocator;
 

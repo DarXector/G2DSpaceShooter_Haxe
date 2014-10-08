@@ -63,7 +63,7 @@ class Main
     {
         trace("G2D is initialized");
 
-        ModelLocator.instance().registry.viewRect = cast _genome.getContext().getStageViewRect();
+        ModelLocator.instance().model.viewRect = cast _genome.getContext().getStageViewRect();
         ModelLocator.instance().assets.assetsLoaded.addOnce(_assetReady);
     }
 
@@ -72,7 +72,7 @@ class Main
         trace("Assets ready!");
 
         var container:GNode = GNodeFactory.createNode("container");
-        ModelLocator.instance().registry.root = container;
+        ModelLocator.instance().model.root = container;
 
         #if flash
         #else
@@ -86,7 +86,7 @@ class Main
         var bg:Background = new Background();
         container.addChild(bg);
 
-        ModelLocator.instance().registry.changeState(StartState);
+        ModelLocator.instance().model.changeState(StartState);
     }
 
     private function _failed(fail:String):Void

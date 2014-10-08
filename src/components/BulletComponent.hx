@@ -3,7 +3,7 @@ package components;
 import model.BulletOwner;
 import entities.Bullet;
 import com.genome2d.geom.GRectangle;
-import model.Registry;
+import model.AppModel;
 import model.ModelLocator;
 import com.genome2d.components.GComponent;
 
@@ -11,28 +11,20 @@ class BulletComponent extends GComponent
 {
     private var _speed:Float = 1;
     private var _viewRect:GRectangle;
-    private var _registry:Registry;
-    private var _bullets:Array<Bullet>;
+    private var _model:AppModel;
     private var _owner:String;
 
     public function new()
     {
         super();
 
-        _registry = ModelLocator.instance().registry;
-        _viewRect = _registry.viewRect;
+        _model = ModelLocator.instance().model;
+        _viewRect = _model.viewRect;
     }
 
     override public function init():Void
     {
         _owner = cast(node, Bullet).owner;
-        if(_owner == BulletOwner.PLAYER)
-        {
-            _bullets = _registry.playerBullets;
-        } else
-        {
-            _bullets = _registry.enemyBullets;
-        }
 
         node.core.onUpdate.add(_update);
     }
@@ -55,22 +47,11 @@ class BulletComponent extends GComponent
                 remove();
             }
         }
-
-
     }
 
     public function remove():Void
     {
-        _registry.gameState.removeChild(this.node);
-
-        for(bullet in _bullets)
-        {
-            if(bullet == this.node)
-            {
-                _bullets.remove(bullet);
-                break;
-            }
-        }
+        _model.removeBullet(cast this.node);
 
         node.core.onUpdate.remove(_update);
         node.dispose();

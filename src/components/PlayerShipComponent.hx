@@ -1,6 +1,6 @@
 package components;
 
-import model.Registry;
+import model.AppModel;
 import model.ModelLocator;
 import model.Assets;
 import com.genome2d.components.renderables.particles.GSimpleParticleSystem;
@@ -15,7 +15,7 @@ class PlayerShipComponent extends GComponent
     public var exploding:Bool;
     private var _explosionEmitter:GSimpleParticleSystem;
     private var _assets:Assets;
-    private var _registry:Registry;
+    private var _model:AppModel;
     private var _shootComponent:Shoot;
 
     private var _invulnerableTimer:Int = 120;
@@ -25,8 +25,7 @@ class PlayerShipComponent extends GComponent
         super();
 
         _assets = ModelLocator.instance().assets;
-        _registry = ModelLocator.instance().registry;
-        _registry.playerComponent = this;
+        _model = ModelLocator.instance().model;
     }
 
     override public function init():Void
@@ -41,13 +40,13 @@ class PlayerShipComponent extends GComponent
         var nodeX = node.transform.x;
         var nodeY = node.transform.y;
         #else
-        var nodeX = node.transform.x + _registry.viewRect.width / 2;
-        var nodeY = node.transform.y + _registry.viewRect.height / 2;
+        var nodeX = node.transform.x + _model.viewRect.width / 2;
+        var nodeY = node.transform.y + _model.viewRect.height / 2;
         #end
 
         if(!exploding)
         {
-            for(bullet in _registry.enemyBullets)
+            for(bullet in _model.enemyBullets)
             {
                 if(bullet.graphics.hitTestPoint(nodeX, nodeY, false, 20, 20))
                 {
@@ -75,12 +74,12 @@ class PlayerShipComponent extends GComponent
 
     private function _respawn():Void
     {
-        _registry.player.booster.forceBurst();
+        _model.player.booster.forceBurst();
         exploding = false;
         _shootComponent.canFire = true;
-        _registry.player.graphics.node.transform.visible = true;
-        _registry.player.booster.node.transform.visible = true;
-        _registry.player.booster.emit = true;
+        _model.player.graphics.node.transform.visible = true;
+        _model.player.booster.node.transform.visible = true;
+        _model.player.booster.emit = true;
 
         _invulnerableTimer = 120;
     }
@@ -91,8 +90,8 @@ class PlayerShipComponent extends GComponent
         if(exploding || _invulnerableTimer > 0) return;
 
         exploding = true;
-        _registry.player.graphics.node.transform.visible = false;
-        _registry.player.booster.node.transform.visible = false;
+        _model.player.graphics.node.transform.visible = false;
+        _model.player.booster.node.transform.visible = false;
         _shootComponent.canFire = false;
 
         if(_explosionEmitter == null)

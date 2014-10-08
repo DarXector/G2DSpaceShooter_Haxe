@@ -134,20 +134,20 @@ Main.prototype = {
 	}
 	,_initialized: function() {
 		console.log("G2D is initialized");
-		model.ModelLocator.initialize().registry.viewRect = this._genome.g2d_context.g2d_stageViewRect;
+		model.ModelLocator.initialize().model.viewRect = this._genome.g2d_context.g2d_stageViewRect;
 		model.ModelLocator.initialize().assets.assetsLoaded.addOnce($bind(this,this._assetReady));
 	}
 	,_assetReady: function() {
 		console.log("Assets ready!");
 		var container = com.genome2d.node.factory.GNodeFactory.createNode("container");
+		model.ModelLocator.initialize().model.root = container;
 		container.g2d_transform.set_x(this._genome.g2d_context.g2d_stageViewRect.width / 2);
 		container.g2d_transform.set_y(this._genome.g2d_context.g2d_stageViewRect.height / 2);
 		var camera = container.addComponent(com.genome2d.components.GCameraController);
 		this._genome.g2d_root.addChild(container);
 		var bg = new entities.Background();
 		container.addChild(bg);
-		var gameState = new states.GameState("game_state");
-		container.addChild(gameState);
+		model.ModelLocator.initialize().model.changeState(states.StartState);
 	}
 	,_failed: function(fail) {
 		console.log("G2D failed");
@@ -1750,6 +1750,275 @@ com.genome2d.components.renderables.particles.GSimpleParticleSystem.prototype = 
 	}
 	,__class__: com.genome2d.components.renderables.particles.GSimpleParticleSystem
 	,__properties__: $extend(com.genome2d.components.GComponent.prototype.__properties__,{set_textureId:"set_textureId",get_textureId:"get_textureId",set_settings:"set_settings",get_settings:"get_settings",set_endColor:"set_endColor",get_endColor:"get_endColor",set_initialColor:"set_initialColor",get_initialColor:"get_initialColor"})
+});
+com.genome2d.components.renderables.text = {};
+com.genome2d.components.renderables.text.GChar = function() {
+	this.g2d_visible = false;
+};
+$hxClasses["com.genome2d.components.renderables.text.GChar"] = com.genome2d.components.renderables.text.GChar;
+com.genome2d.components.renderables.text.GChar.__name__ = ["com","genome2d","components","renderables","text","GChar"];
+com.genome2d.components.renderables.text.GChar.prototype = {
+	toString: function() {
+		return String.fromCharCode(this.g2d_code) + ":" + this.g2d_x + ":" + this.g2d_y;
+	}
+	,__class__: com.genome2d.components.renderables.text.GChar
+};
+com.genome2d.components.renderables.text.GTextureText = function() {
+	this.g2d_height = 100;
+	this.g2d_width = 100;
+	this.g2d_autoSize = false;
+	this.g2d_text = "";
+	this.g2d_hAlign = 0;
+	this.g2d_vAlign = 0;
+	this.g2d_lineSpace = 0;
+	this.g2d_tracking = 0;
+	this.g2d_invalidate = false;
+	this.blendMode = 1;
+	com.genome2d.components.GComponent.call(this);
+};
+$hxClasses["com.genome2d.components.renderables.text.GTextureText"] = com.genome2d.components.renderables.text.GTextureText;
+com.genome2d.components.renderables.text.GTextureText.__name__ = ["com","genome2d","components","renderables","text","GTextureText"];
+com.genome2d.components.renderables.text.GTextureText.__interfaces__ = [com.genome2d.components.renderables.IRenderable];
+com.genome2d.components.renderables.text.GTextureText.__super__ = com.genome2d.components.GComponent;
+com.genome2d.components.renderables.text.GTextureText.prototype = $extend(com.genome2d.components.GComponent.prototype,{
+	get_tracking: function() {
+		return this.g2d_tracking;
+	}
+	,set_tracking: function(p_tracking) {
+		this.g2d_tracking = p_tracking;
+		this.g2d_invalidate = true;
+		return this.g2d_tracking;
+	}
+	,get_lineSpace: function() {
+		return this.g2d_lineSpace;
+	}
+	,set_lineSpace: function(p_value) {
+		this.g2d_lineSpace = p_value;
+		this.g2d_invalidate = true;
+		return this.g2d_lineSpace;
+	}
+	,get_vAlign: function() {
+		return this.g2d_vAlign;
+	}
+	,set_vAlign: function(p_value) {
+		this.g2d_vAlign = p_value;
+		this.g2d_invalidate = true;
+		return this.g2d_vAlign;
+	}
+	,get_hAlign: function() {
+		return this.g2d_hAlign;
+	}
+	,set_hAlign: function(p_value) {
+		this.g2d_hAlign = p_value;
+		this.g2d_invalidate = true;
+		return this.g2d_hAlign;
+	}
+	,get_textureAtlasId: function() {
+		if(this.g2d_textureAtlas != null) return this.g2d_textureAtlas.g2d_id;
+		return "";
+	}
+	,set_textureAtlasId: function(p_value) {
+		this.setTextureAtlas(com.genome2d.textures.GTextureFontAtlas.getTextureFontAtlasById(p_value));
+		return p_value;
+	}
+	,setTextureAtlas: function(p_textureAtlas) {
+		this.g2d_textureAtlas = p_textureAtlas;
+		this.g2d_invalidate = true;
+	}
+	,get_text: function() {
+		return this.g2d_text;
+	}
+	,set_text: function(p_text) {
+		this.g2d_text = p_text;
+		this.g2d_invalidate = true;
+		return this.g2d_text;
+	}
+	,get_autoSize: function() {
+		return this.g2d_autoSize;
+	}
+	,set_autoSize: function(p_value) {
+		this.g2d_autoSize = p_value;
+		this.g2d_invalidate = true;
+		return this.g2d_autoSize;
+	}
+	,get_width: function() {
+		if(this.g2d_autoSize && this.g2d_invalidate) this.invalidateText();
+		return this.g2d_width;
+	}
+	,set_width: function(p_value) {
+		this.g2d_width = p_value;
+		this.g2d_invalidate = true;
+		return this.g2d_width;
+	}
+	,get_height: function() {
+		if(this.g2d_autoSize && this.g2d_invalidate) this.invalidateText();
+		return this.g2d_height;
+	}
+	,set_height: function(p_value) {
+		this.g2d_height = p_value;
+		this.g2d_invalidate = true;
+		return this.g2d_height;
+	}
+	,render: function(p_camera,p_useMatrix) {
+		if(this.g2d_invalidate) this.invalidateText();
+		var charCount = this.g2d_chars.length;
+		var cos = 1;
+		var sin = 0;
+		if(this.g2d_node.g2d_transform.g2d_worldRotation != 0) {
+			cos = Math.cos(this.g2d_node.g2d_transform.g2d_worldRotation);
+			sin = Math.sin(this.g2d_node.g2d_transform.g2d_worldRotation);
+		}
+		var _g = 0;
+		while(_g < charCount) {
+			var i = _g++;
+			var $char = this.g2d_chars[i];
+			if(!$char.g2d_visible) break;
+			var tx = $char.g2d_x * this.g2d_node.g2d_transform.g2d_worldScaleX + this.g2d_node.g2d_transform.g2d_worldX;
+			var ty = $char.g2d_y * this.g2d_node.g2d_transform.g2d_worldScaleY + this.g2d_node.g2d_transform.g2d_worldY;
+			if(this.g2d_node.g2d_transform.g2d_worldRotation != 0) {
+				tx = ($char.g2d_x * cos - $char.g2d_y * sin) * this.g2d_node.g2d_transform.g2d_worldScaleX + this.g2d_node.g2d_transform.g2d_worldX;
+				ty = ($char.g2d_y * cos + $char.g2d_x * sin) * this.g2d_node.g2d_transform.g2d_worldScaleY + this.g2d_node.g2d_transform.g2d_worldY;
+			}
+			((function($this) {
+				var $r;
+				if(com.genome2d.node.GNode.g2d_core == null) com.genome2d.node.GNode.g2d_core = com.genome2d.Genome2D.getInstance();
+				$r = com.genome2d.node.GNode.g2d_core;
+				return $r;
+			}(this))).getContext().draw($char.g2d_texture,tx,ty,this.g2d_node.g2d_transform.g2d_worldScaleX,this.g2d_node.g2d_transform.g2d_worldScaleY,this.g2d_node.g2d_transform.g2d_worldRotation,this.g2d_node.g2d_transform.g2d_worldRed,this.g2d_node.g2d_transform.g2d_worldGreen,this.g2d_node.g2d_transform.g2d_worldBlue,this.g2d_node.g2d_transform.g2d_worldAlpha,1,null);
+		}
+	}
+	,invalidateText: function() {
+		if(this.g2d_textureAtlas == null) return;
+		if(this.g2d_chars == null) this.g2d_chars = new Array();
+		if(this.g2d_autoSize) this.g2d_width = 0;
+		var offsetX = 0;
+		var offsetY = 0;
+		var $char;
+		var texture = null;
+		var currentCharCode = -1;
+		var previousCharCode = -1;
+		var lastChar = 0;
+		var lines = new Array();
+		var currentLine = new Array();
+		var charIndex = 0;
+		var whiteSpaceIndex = -1;
+		var i = 0;
+		while(i < this.g2d_text.length) {
+			if(HxOverrides.cca(this.g2d_text,i) == 10) {
+				if(this.g2d_autoSize) if(offsetX > this.g2d_width) this.g2d_width = offsetX; else this.g2d_width = this.g2d_width;
+				previousCharCode = -1;
+				lines.push(currentLine);
+				currentLine = new Array();
+				if(!this.g2d_autoSize && offsetY + 2 * (this.g2d_textureAtlas.lineHeight + this.g2d_lineSpace) > this.g2d_height) break;
+				offsetX = 0;
+				offsetY += this.g2d_textureAtlas.lineHeight + this.g2d_lineSpace;
+			} else {
+				currentCharCode = HxOverrides.cca(this.g2d_text,i);
+				texture = this.g2d_textureAtlas.getSubTexture(currentCharCode == null?"null":"" + currentCharCode);
+				if(texture == null) {
+					i++;
+					continue;
+				}
+				if(previousCharCode != -1) offsetX += this.g2d_textureAtlas.getKerning(previousCharCode,currentCharCode);
+				if(currentCharCode != 32) {
+					if(charIndex >= this.g2d_chars.length) {
+						$char = new com.genome2d.components.renderables.text.GChar();
+						this.g2d_chars.push($char);
+					} else $char = this.g2d_chars[charIndex];
+					$char.g2d_code = currentCharCode;
+					$char.g2d_texture = texture;
+					if(!this.g2d_autoSize && offsetX + (texture.g2d_region.width | 0) > this.g2d_width) {
+						lines.push(currentLine);
+						var backtrack = i - whiteSpaceIndex - 1;
+						var currentCount = currentLine.length;
+						currentLine.splice(currentLine.length - backtrack,backtrack);
+						currentLine = new Array();
+						charIndex -= backtrack;
+						if(backtrack >= currentCount) break;
+						if(!this.g2d_autoSize && offsetY + 2 * (this.g2d_textureAtlas.lineHeight + this.g2d_lineSpace) > this.g2d_height) break;
+						i = whiteSpaceIndex + 1;
+						offsetX = 0;
+						offsetY += this.g2d_textureAtlas.lineHeight + this.g2d_lineSpace;
+						continue;
+					}
+					currentLine.push($char);
+					$char.g2d_visible = true;
+					$char.g2d_x = offsetX + texture.xoffset;
+					$char.g2d_y = offsetY + texture.yoffset;
+					charIndex++;
+				} else whiteSpaceIndex = i;
+				offsetX += texture.xadvance + this.g2d_tracking;
+				previousCharCode = currentCharCode;
+			}
+			i++;
+		}
+		lines.push(currentLine);
+		var charCount = this.g2d_chars.length;
+		var _g = charIndex;
+		while(_g < charCount) {
+			var i1 = _g++;
+			this.g2d_chars[i1].g2d_visible = false;
+		}
+		if(this.g2d_autoSize) {
+			this.g2d_width = offsetX;
+			this.g2d_height = offsetY + this.g2d_textureAtlas.lineHeight;
+		}
+		var bottom = offsetY + this.g2d_textureAtlas.lineHeight;
+		var offsetY1 = 0;
+		if(this.g2d_vAlign == 1) offsetY1 = (this.g2d_height - bottom) * .5; else if(this.g2d_vAlign == 2) offsetY1 = this.g2d_height - bottom;
+		var _g1 = 0;
+		var _g2 = lines.length;
+		while(_g1 < _g2) {
+			var i2 = _g1++;
+			var currentLine1 = lines[i2];
+			charCount = currentLine1.length;
+			if(charCount == 0) continue;
+			var offsetX1 = 0;
+			var last = currentLine1[charCount - 1];
+			var right = last.g2d_x - last.g2d_texture.xoffset + last.g2d_texture.xadvance;
+			if(this.g2d_hAlign == 1) offsetX1 = (this.g2d_width - right) * .5; else if(this.g2d_hAlign == 2) offsetX1 = this.g2d_width - right;
+			var _g21 = 0;
+			while(_g21 < charCount) {
+				var j = _g21++;
+				var char1 = currentLine1[j];
+				char1.g2d_x = char1.g2d_x + offsetX1;
+				char1.g2d_y = char1.g2d_y + offsetY1;
+			}
+		}
+		this.g2d_invalidate = false;
+	}
+	,processContextMouseSignal: function(p_captured,p_cameraX,p_cameraY,p_contextSignal) {
+		if(this.g2d_width == 0 || this.g2d_height == 0) return false;
+		if(p_captured) {
+			if(this.g2d_node.g2d_mouseOverNode == this.g2d_node) this.g2d_node.dispatchNodeMouseSignal("mouseOut",this.g2d_node,0,0,p_contextSignal);
+			return false;
+		}
+		var tx = p_cameraX - this.g2d_node.g2d_transform.g2d_worldX;
+		var ty = p_cameraY - this.g2d_node.g2d_transform.g2d_worldY;
+		if(this.g2d_node.g2d_transform.g2d_worldRotation != 0) {
+			var cos = Math.cos(-this.g2d_node.g2d_transform.g2d_worldRotation);
+			var sin = Math.sin(-this.g2d_node.g2d_transform.g2d_worldRotation);
+			var ox = tx;
+			tx = tx * cos - ty * sin;
+			ty = ty * cos + ox * sin;
+		}
+		tx /= this.g2d_node.g2d_transform.g2d_worldScaleX * this.g2d_width;
+		ty /= this.g2d_node.g2d_transform.g2d_worldScaleY * this.g2d_height;
+		var tw = 0;
+		var th = 0;
+		if(tx >= -tw && tx <= 1 - tw && ty >= -th && ty <= 1 - th) {
+			this.g2d_node.dispatchNodeMouseSignal(p_contextSignal.type,this.g2d_node,tx * this.g2d_width,ty * this.g2d_height,p_contextSignal);
+			if(this.g2d_node.g2d_mouseOverNode != this.g2d_node) this.g2d_node.dispatchNodeMouseSignal("mouseOver",this.g2d_node,tx * this.g2d_width,ty * this.g2d_height,p_contextSignal);
+			return true;
+		} else if(this.g2d_node.g2d_mouseOverNode == this.g2d_node) this.g2d_node.dispatchNodeMouseSignal("mouseOut",this.g2d_node,tx * this.g2d_width,ty * this.g2d_height,p_contextSignal);
+		return false;
+	}
+	,getBounds: function(p_bounds) {
+		if(p_bounds != null) p_bounds.setTo(0,0,this.g2d_width,this.g2d_height); else p_bounds = new com.genome2d.geom.GRectangle(0,0,this.g2d_width,this.g2d_height);
+		return p_bounds;
+	}
+	,__class__: com.genome2d.components.renderables.text.GTextureText
+	,__properties__: $extend(com.genome2d.components.GComponent.prototype.__properties__,{set_height:"set_height",get_height:"get_height",set_width:"set_width",get_width:"get_width",set_autoSize:"set_autoSize",get_autoSize:"get_autoSize",set_text:"set_text",get_text:"get_text",set_textureAtlasId:"set_textureAtlasId",get_textureAtlasId:"get_textureAtlasId",set_hAlign:"set_hAlign",get_hAlign:"get_hAlign",set_vAlign:"set_vAlign",get_vAlign:"get_vAlign",set_lineSpace:"set_lineSpace",get_lineSpace:"get_lineSpace",set_tracking:"set_tracking",get_tracking:"get_tracking"})
 });
 com.genome2d.context = {};
 com.genome2d.context.GBlendMode = function() { };
@@ -3910,11 +4179,18 @@ com.genome2d.textures.factories.GTextureFactory.createFromAsset = function(p_id,
 com.genome2d.textures.factories.GTextureFactory.createRenderTexture = function(p_id,p_width,p_height) {
 	return null;
 };
+com.genome2d.utils = {};
+com.genome2d.utils.GHAlignType = function() { };
+$hxClasses["com.genome2d.utils.GHAlignType"] = com.genome2d.utils.GHAlignType;
+com.genome2d.utils.GHAlignType.__name__ = ["com","genome2d","utils","GHAlignType"];
+com.genome2d.utils.GVAlignType = function() { };
+$hxClasses["com.genome2d.utils.GVAlignType"] = com.genome2d.utils.GVAlignType;
+com.genome2d.utils.GVAlignType.__name__ = ["com","genome2d","utils","GVAlignType"];
 var components = {};
 components.BackgroundMovement = function() {
 	this._speed = 0.1;
 	com.genome2d.components.GComponent.call(this);
-	this._viewRect = model.ModelLocator.initialize().registry.viewRect;
+	this._viewRect = model.ModelLocator.initialize().model.viewRect;
 };
 $hxClasses["components.BackgroundMovement"] = components.BackgroundMovement;
 components.BackgroundMovement.__name__ = ["components","BackgroundMovement"];
@@ -3936,15 +4212,60 @@ components.BackgroundMovement.prototype = $extend(com.genome2d.components.GCompo
 	}
 	,__class__: components.BackgroundMovement
 });
+components.BulletComponent = function() {
+	this._speed = 1;
+	com.genome2d.components.GComponent.call(this);
+	this._model = model.ModelLocator.initialize().model;
+	this._viewRect = this._model.viewRect;
+};
+$hxClasses["components.BulletComponent"] = components.BulletComponent;
+components.BulletComponent.__name__ = ["components","BulletComponent"];
+components.BulletComponent.__super__ = com.genome2d.components.GComponent;
+components.BulletComponent.prototype = $extend(com.genome2d.components.GComponent.prototype,{
+	init: function() {
+		this._owner = (js.Boot.__cast(this.g2d_node , entities.Bullet)).owner;
+		((function($this) {
+			var $r;
+			if(com.genome2d.node.GNode.g2d_core == null) com.genome2d.node.GNode.g2d_core = com.genome2d.Genome2D.getInstance();
+			$r = com.genome2d.node.GNode.g2d_core;
+			return $r;
+		}(this))).get_onUpdate().add($bind(this,this._update));
+	}
+	,_update: function(deltaTime) {
+		if(this.g2d_node == null) return;
+		if(this._owner == model.BulletOwner.PLAYER) {
+			var _g = this.g2d_node.g2d_transform;
+			_g.g2d_transformDirty = _g.g2d_matrixDirty = true;
+			_g.g2d_localY = _g.g2d_worldY = _g.g2d_localY - this._speed * deltaTime;
+			if(this.g2d_node.g2d_transform.g2d_localY < -this._viewRect.height / 2 - 50) this.remove();
+		} else {
+			var _g1 = this.g2d_node.g2d_transform;
+			_g1.g2d_transformDirty = _g1.g2d_matrixDirty = true;
+			_g1.g2d_localY = _g1.g2d_worldY = _g1.g2d_localY + this._speed * deltaTime;
+			if(this.g2d_node.g2d_transform.g2d_localY > this._viewRect.height / 2) this.remove();
+		}
+	}
+	,remove: function() {
+		this._model.removeBullet(this.g2d_node);
+		((function($this) {
+			var $r;
+			if(com.genome2d.node.GNode.g2d_core == null) com.genome2d.node.GNode.g2d_core = com.genome2d.Genome2D.getInstance();
+			$r = com.genome2d.node.GNode.g2d_core;
+			return $r;
+		}(this))).get_onUpdate().remove($bind(this,this._update));
+		this.g2d_node.dispose();
+	}
+	,__class__: components.BulletComponent
+});
 components.EnemyShipComponent = function() {
 	this._amplitude = 100;
 	this._explodeDelay = 120;
 	this._exploding = false;
 	this._speed = 0.2;
 	com.genome2d.components.GComponent.call(this);
-	this._registry = model.ModelLocator.initialize().registry;
+	this._model = model.ModelLocator.initialize().model;
 	this._assets = model.ModelLocator.initialize().assets;
-	this._viewRect = this._registry.viewRect;
+	this._viewRect = this._model.viewRect;
 };
 $hxClasses["components.EnemyShipComponent"] = components.EnemyShipComponent;
 components.EnemyShipComponent.__name__ = ["components","EnemyShipComponent"];
@@ -3965,18 +4286,18 @@ components.EnemyShipComponent.prototype = $extend(com.genome2d.components.GCompo
 		var nodeY = this.g2d_node.g2d_transform.g2d_localY + this._viewRect.height / 2;
 		if(!this._exploding) {
 			var _g = 0;
-			var _g1 = this._registry.playerBullets;
+			var _g1 = this._model.playerBullets;
 			while(_g < _g1.length) {
 				var bullet = _g1[_g];
 				++_g;
 				if(bullet.graphics.hitTestPoint(nodeX,nodeY,false,20,20)) {
-					(js.Boot.__cast(bullet.getComponent(components.PlayerBulletComponent) , components.PlayerBulletComponent)).remove();
+					(js.Boot.__cast(bullet.getComponent(components.BulletComponent) , components.BulletComponent)).remove();
 					this.explode();
 				}
 			}
 		}
-		if(!this._exploding && !this._registry.playerComponent.exploding && this._registry.player.graphics.hitTestPoint(nodeX,nodeY,false,20,20)) {
-			this._registry.playerComponent.explode();
+		if(!this._exploding && !this._model.playerComponent.exploding && this._model.player.graphics.hitTestPoint(nodeX,nodeY,false,20,20)) {
+			this._model.playerComponent.explode();
 			this.explode();
 		}
 		var _g2 = this.g2d_node.g2d_transform;
@@ -3993,17 +4314,8 @@ components.EnemyShipComponent.prototype = $extend(com.genome2d.components.GCompo
 		if(this.g2d_node.g2d_transform.g2d_localY > this._viewRect.height / 2 + 100) this.remove();
 	}
 	,remove: function() {
-		this._registry.gameState.removeChild(this.g2d_node);
-		var _g = 0;
-		var _g1 = this._registry.enemies;
-		while(_g < _g1.length) {
-			var enemy = _g1[_g];
-			++_g;
-			if(enemy == this.g2d_node) {
-				HxOverrides.remove(this._registry.enemies,enemy);
-				break;
-			}
-		}
+		this._model.removeEnemy(this.g2d_node);
+		(js.Boot.__cast(this.g2d_node.getComponent(components.Shoot) , components.Shoot)).canFire = false;
 		((function($this) {
 			var $r;
 			if(com.genome2d.node.GNode.g2d_core == null) com.genome2d.node.GNode.g2d_core = com.genome2d.Genome2D.getInstance();
@@ -4016,6 +4328,7 @@ components.EnemyShipComponent.prototype = $extend(com.genome2d.components.GCompo
 		if(this._exploding) return;
 		this._exploding = true;
 		(js.Boot.__cast(this.g2d_node , entities.EnemyShip)).graphics.g2d_node.g2d_transform.visible = false;
+		(js.Boot.__cast(this.g2d_node.getComponent(components.Shoot) , components.Shoot)).canFire = false;
 		if(this._explosionEmitter == null) {
 			this._explosionEmitter = com.genome2d.node.factory.GNodeFactory.createNodeWithComponent(com.genome2d.components.renderables.particles.GSimpleParticleSystem,"explosion_emitter");
 			this._explosionEmitter.texture = this._assets.atlas.getSubTexture("Particle");
@@ -4049,7 +4362,7 @@ components.EnemySpawner = function() {
 	this._enemySpawnCounter = 60;
 	this._enemySpawnInterval = 60;
 	com.genome2d.components.GComponent.call(this);
-	this._registry = model.ModelLocator.initialize().registry;
+	this._model = model.ModelLocator.initialize().model;
 	this._texture = model.ModelLocator.initialize().assets.atlas.getSubTexture("EnemySpaceship");
 };
 $hxClasses["components.EnemySpawner"] = components.EnemySpawner;
@@ -4073,13 +4386,14 @@ components.EnemySpawner.prototype = $extend(com.genome2d.components.GComponent.p
 		} else this._enemySpawnCounter--;
 	}
 	,_spawnEnemy: function() {
-		var e = new entities.EnemyShip(this._registry,this._texture);
+		var e = new entities.EnemyShip(this._model,this._texture);
 	}
 	,__class__: components.EnemySpawner
 });
 components.FollowMouseComponent = function() {
 	com.genome2d.components.GComponent.call(this);
-	this._viewRect = model.ModelLocator.initialize().registry.viewRect;
+	this._viewRect = model.ModelLocator.initialize().model.viewRect;
+	this._stage = com.genome2d.Genome2D.getInstance().getContext().getNativeStage();
 };
 $hxClasses["components.FollowMouseComponent"] = components.FollowMouseComponent;
 components.FollowMouseComponent.__name__ = ["components","FollowMouseComponent"];
@@ -4087,6 +4401,10 @@ components.FollowMouseComponent.__super__ = com.genome2d.components.GComponent;
 components.FollowMouseComponent.prototype = $extend(com.genome2d.components.GComponent.prototype,{
 	init: function() {
 		com.genome2d.Genome2D.getInstance().getContext().onMouseSignal.add($bind(this,this._onMouse));
+	}
+	,_update: function(dt) {
+		this.g2d_node.g2d_transform.set_x(this._stage.mouseX - this._viewRect.width / 2);
+		this.g2d_node.g2d_transform.set_y(this._stage.mouseY - this._viewRect.height / 2);
 	}
 	,_onMouse: function(e) {
 		if(e.type == "mouseMove") {
@@ -4096,76 +4414,42 @@ components.FollowMouseComponent.prototype = $extend(com.genome2d.components.GCom
 	}
 	,__class__: components.FollowMouseComponent
 });
-components.PlayerBulletComponent = function() {
-	this._speed = 1;
-	com.genome2d.components.GComponent.call(this);
-	this._registry = model.ModelLocator.initialize().registry;
-	this._viewRect = this._registry.viewRect;
-};
-$hxClasses["components.PlayerBulletComponent"] = components.PlayerBulletComponent;
-components.PlayerBulletComponent.__name__ = ["components","PlayerBulletComponent"];
-components.PlayerBulletComponent.__super__ = com.genome2d.components.GComponent;
-components.PlayerBulletComponent.prototype = $extend(com.genome2d.components.GComponent.prototype,{
-	init: function() {
-		((function($this) {
-			var $r;
-			if(com.genome2d.node.GNode.g2d_core == null) com.genome2d.node.GNode.g2d_core = com.genome2d.Genome2D.getInstance();
-			$r = com.genome2d.node.GNode.g2d_core;
-			return $r;
-		}(this))).get_onUpdate().add($bind(this,this._update));
-	}
-	,_update: function(deltaTime) {
-		if(this.g2d_node == null) return;
-		var _g = this.g2d_node.g2d_transform;
-		_g.g2d_transformDirty = _g.g2d_matrixDirty = true;
-		_g.g2d_localY = _g.g2d_worldY = _g.g2d_localY - this._speed * deltaTime;
-		if(this.g2d_node.g2d_transform.g2d_localY < -this._viewRect.height / 2 - 50) this.remove();
-	}
-	,remove: function() {
-		this._registry.gameState.removeChild(this.g2d_node);
-		var _g = 0;
-		var _g1 = this._registry.playerBullets;
-		while(_g < _g1.length) {
-			var bullet = _g1[_g];
-			++_g;
-			if(bullet == this.g2d_node) {
-				HxOverrides.remove(this._registry.playerBullets,bullet);
-				break;
-			}
-		}
-		((function($this) {
-			var $r;
-			if(com.genome2d.node.GNode.g2d_core == null) com.genome2d.node.GNode.g2d_core = com.genome2d.Genome2D.getInstance();
-			$r = com.genome2d.node.GNode.g2d_core;
-			return $r;
-		}(this))).get_onUpdate().remove($bind(this,this._update));
-		this.g2d_node.dispose();
-	}
-	,__class__: components.PlayerBulletComponent
-});
 components.PlayerShipComponent = function() {
 	this._invulnerableTimer = 120;
 	this._explosionDelay = 120;
 	this._explosionTimer = 120;
 	com.genome2d.components.GComponent.call(this);
 	this._assets = model.ModelLocator.initialize().assets;
-	this._registry = model.ModelLocator.initialize().registry;
-	this._registry.playerComponent = this;
+	this._model = model.ModelLocator.initialize().model;
 };
 $hxClasses["components.PlayerShipComponent"] = components.PlayerShipComponent;
 components.PlayerShipComponent.__name__ = ["components","PlayerShipComponent"];
 components.PlayerShipComponent.__super__ = com.genome2d.components.GComponent;
 components.PlayerShipComponent.prototype = $extend(com.genome2d.components.GComponent.prototype,{
 	init: function() {
+		this._shootComponent = js.Boot.__cast(this.g2d_node.getComponent(components.Shoot) , components.Shoot);
 		((function($this) {
 			var $r;
 			if(com.genome2d.node.GNode.g2d_core == null) com.genome2d.node.GNode.g2d_core = com.genome2d.Genome2D.getInstance();
 			$r = com.genome2d.node.GNode.g2d_core;
 			return $r;
 		}(this))).get_onUpdate().add($bind(this,this._update));
-		this._shootComponent = js.Boot.__cast(this.g2d_node.getComponent(components.PlayerShoot) , components.PlayerShoot);
 	}
 	,_update: function(deltaTime) {
+		var nodeX = this.g2d_node.g2d_transform.g2d_localX + this._model.viewRect.width / 2;
+		var nodeY = this.g2d_node.g2d_transform.g2d_localY + this._model.viewRect.height / 2;
+		if(!this.exploding) {
+			var _g = 0;
+			var _g1 = this._model.enemyBullets;
+			while(_g < _g1.length) {
+				var bullet = _g1[_g];
+				++_g;
+				if(bullet.graphics.hitTestPoint(nodeX,nodeY,false,20,20)) {
+					(js.Boot.__cast(bullet.getComponent(components.BulletComponent) , components.BulletComponent)).remove();
+					this.explode();
+				}
+			}
+		}
 		if(this.exploding) {
 			this._explosionDelay--;
 			if(this._explosionDelay <= 0) {
@@ -4176,19 +4460,19 @@ components.PlayerShipComponent.prototype = $extend(com.genome2d.components.GComp
 		if(this._invulnerableTimer > 0) this._invulnerableTimer--;
 	}
 	,_respawn: function() {
-		this._registry.player.booster.forceBurst();
+		this._model.player.booster.forceBurst();
 		this.exploding = false;
 		this._shootComponent.canFire = true;
-		this._registry.player.graphics.g2d_node.g2d_transform.visible = true;
-		this._registry.player.booster.g2d_node.g2d_transform.visible = true;
-		this._registry.player.booster.emit = true;
+		this._model.player.graphics.g2d_node.g2d_transform.visible = true;
+		this._model.player.booster.g2d_node.g2d_transform.visible = true;
+		this._model.player.booster.emit = true;
 		this._invulnerableTimer = 120;
 	}
 	,explode: function() {
 		if(this.exploding || this._invulnerableTimer > 0) return;
 		this.exploding = true;
-		this._registry.player.graphics.g2d_node.g2d_transform.visible = false;
-		this._registry.player.booster.g2d_node.g2d_transform.visible = false;
+		this._model.player.graphics.g2d_node.g2d_transform.visible = false;
+		this._model.player.booster.g2d_node.g2d_transform.visible = false;
 		this._shootComponent.canFire = false;
 		if(this._explosionEmitter == null) {
 			this._explosionEmitter = com.genome2d.node.factory.GNodeFactory.createNodeWithComponent(com.genome2d.components.renderables.particles.GSimpleParticleSystem,"explosion_emitter");
@@ -4219,20 +4503,28 @@ components.PlayerShipComponent.prototype = $extend(com.genome2d.components.GComp
 	}
 	,__class__: components.PlayerShipComponent
 });
-components.PlayerShoot = function() {
-	this.canFire = true;
+components.Shoot = function() {
 	this._intervalTime = 10;
 	com.genome2d.components.GComponent.call(this);
-	this._registry = model.ModelLocator.initialize().registry;
-	this._texture = model.ModelLocator.initialize().assets.atlas.getSubTexture("PlayerBullet");
-	this._delay = this._intervalTime;
+	this._model = model.ModelLocator.initialize().model;
 	com.genome2d.Genome2D.getInstance().getContext().onMouseSignal.add($bind(this,this._onMouse));
 };
-$hxClasses["components.PlayerShoot"] = components.PlayerShoot;
-components.PlayerShoot.__name__ = ["components","PlayerShoot"];
-components.PlayerShoot.__super__ = com.genome2d.components.GComponent;
-components.PlayerShoot.prototype = $extend(com.genome2d.components.GComponent.prototype,{
+$hxClasses["components.Shoot"] = components.Shoot;
+components.Shoot.__name__ = ["components","Shoot"];
+components.Shoot.__super__ = com.genome2d.components.GComponent;
+components.Shoot.prototype = $extend(com.genome2d.components.GComponent.prototype,{
 	init: function() {
+		if(Type.getClass(this.g2d_node) == entities.Player) this._owner = model.BulletOwner.PLAYER; else this._owner = model.BulletOwner.ENEMY;
+		if(Type.getClass(this.g2d_node) == entities.Player) {
+			this._owner = model.BulletOwner.PLAYER;
+			this._delay = this._intervalTime = 10;
+		} else {
+			this._owner = model.BulletOwner.ENEMY;
+			this._intervalTime = 100;
+			this._delay = Math.round(Math.random() * 100);
+		}
+		this._texture = model.ModelLocator.initialize().assets.atlas.getSubTexture("PlayerBullet");
+		this.canFire = true;
 		((function($this) {
 			var $r;
 			if(com.genome2d.node.GNode.g2d_core == null) com.genome2d.node.GNode.g2d_core = com.genome2d.Genome2D.getInstance();
@@ -4252,27 +4544,36 @@ components.PlayerShoot.prototype = $extend(com.genome2d.components.GComponent.pr
 		}
 	}
 	,_update: function(deltaTime) {
-		if(this._delay > 0) this._delay--; else if(this._mouseDown && this.canFire) this._shoot();
+		if(this._delay > 0) this._delay--; else if((this._owner == model.BulletOwner.ENEMY || this._mouseDown) && this.canFire) this._shoot();
 	}
 	,_shoot: function() {
 		this._delay = this._intervalTime;
-		var b = new entities.PlayerBullet(this._registry,this._texture,this.g2d_node.g2d_transform.g2d_localX - 10,this.g2d_node.g2d_transform.g2d_localY);
-		var c = new entities.PlayerBullet(this._registry,this._texture,this.g2d_node.g2d_transform.g2d_localX + 14,this.g2d_node.g2d_transform.g2d_localY);
+		var b = new entities.Bullet(this._owner,this._model,this._texture,this.g2d_node.g2d_transform.g2d_localX - 10,this.g2d_node.g2d_transform.g2d_localY);
+		var c = new entities.Bullet(this._owner,this._model,this._texture,this.g2d_node.g2d_transform.g2d_localX + 14,this.g2d_node.g2d_transform.g2d_localY);
 	}
-	,__class__: components.PlayerShoot
+	,_onDestroyed: function() {
+		this.canFire = false;
+		((function($this) {
+			var $r;
+			if(com.genome2d.node.GNode.g2d_core == null) com.genome2d.node.GNode.g2d_core = com.genome2d.Genome2D.getInstance();
+			$r = com.genome2d.node.GNode.g2d_core;
+			return $r;
+		}(this))).get_onUpdate().remove($bind(this,this._update));
+	}
+	,__class__: components.Shoot
 });
 var entities = {};
 entities.Background = function() {
 	com.genome2d.node.GNode.call(this,"background_stars");
 	var assets = model.ModelLocator.initialize().assets;
-	var registry = model.ModelLocator.initialize().registry;
+	var model1 = model.ModelLocator.initialize().model;
 	this.graphics1 = com.genome2d.node.factory.GNodeFactory.createNodeWithComponent(com.genome2d.components.renderables.GSprite,"bg_graphics");
 	this.graphics1.texture = assets.atlas.getSubTexture("Background");
 	this.addChild(this.graphics1.g2d_node);
 	this.graphics2 = com.genome2d.node.factory.GNodeFactory.createNodeWithComponent(com.genome2d.components.renderables.GSprite,"bg_graphics");
 	this.graphics2.texture = assets.atlas.getSubTexture("Background");
 	this.addChild(this.graphics2.g2d_node);
-	this.graphics2.g2d_node.g2d_transform.set_y(-registry.viewRect.height);
+	this.graphics2.g2d_node.g2d_transform.set_y(-model1.viewRect.height);
 	this.addComponent(components.BackgroundMovement);
 };
 $hxClasses["entities.Background"] = entities.Background;
@@ -4281,16 +4582,34 @@ entities.Background.__super__ = com.genome2d.node.GNode;
 entities.Background.prototype = $extend(com.genome2d.node.GNode.prototype,{
 	__class__: entities.Background
 });
-entities.EnemyShip = function(registry,texture) {
+entities.Bullet = function(_owner,_model,texture,_x,_y) {
+	com.genome2d.node.GNode.call(this,"player_bullet");
+	this.g2d_transform.set_x(_x);
+	this.g2d_transform.set_y(_y);
+	this.owner = _owner;
+	this.graphics = com.genome2d.node.factory.GNodeFactory.createNodeWithComponent(com.genome2d.components.renderables.GSprite,"player_bullet_graphic");
+	this.graphics.texture = texture;
+	if(this.owner == model.BulletOwner.ENEMY) this.graphics.g2d_node.g2d_transform.set_rotation(Math.PI);
+	this.addChild(this.graphics.g2d_node);
+	_model.addBullet(this);
+	this.addComponent(components.BulletComponent);
+};
+$hxClasses["entities.Bullet"] = entities.Bullet;
+entities.Bullet.__name__ = ["entities","Bullet"];
+entities.Bullet.__super__ = com.genome2d.node.GNode;
+entities.Bullet.prototype = $extend(com.genome2d.node.GNode.prototype,{
+	__class__: entities.Bullet
+});
+entities.EnemyShip = function(_model,texture) {
 	com.genome2d.node.GNode.call(this,"enemy_ship");
 	this.graphics = com.genome2d.node.factory.GNodeFactory.createNodeWithComponent(com.genome2d.components.renderables.GSprite,"enemy_ship_graphics");
 	this.graphics.texture = texture;
 	this.addChild(this.graphics.g2d_node);
-	this.g2d_transform.set_x((Math.random() * registry.viewRect.width - registry.viewRect.width / 2) * 0.9);
-	this.g2d_transform.set_y(-registry.viewRect.height / 2 - 50);
-	registry.gameState.addChild(this);
-	registry.enemies.push(this);
+	this.g2d_transform.set_x((Math.random() * _model.viewRect.width - _model.viewRect.width / 2) * 0.9);
+	this.g2d_transform.set_y(-_model.viewRect.height / 2 - 50);
+	_model.addEnemy(this);
 	if(Math.round(Math.random()) == 0) this.movementType = model.MovementTypes.SINUSOIDAL; else this.movementType = model.MovementTypes.STREIGHT;
+	this.addComponent(components.Shoot);
 	this.addComponent(components.EnemyShipComponent);
 };
 $hxClasses["entities.EnemyShip"] = entities.EnemyShip;
@@ -4302,7 +4621,6 @@ entities.EnemyShip.prototype = $extend(com.genome2d.node.GNode.prototype,{
 entities.Player = function(id) {
 	com.genome2d.node.GNode.call(this,id);
 	var assets = model.ModelLocator.initialize().assets;
-	model.ModelLocator.initialize().registry.player = this;
 	this.booster = com.genome2d.node.factory.GNodeFactory.createNodeWithComponent(com.genome2d.components.renderables.particles.GSimpleParticleSystem,"booster_emitter");
 	this.booster.texture = assets.atlas.getSubTexture("Particle");
 	this.booster.emit = true;
@@ -4331,31 +4649,15 @@ entities.Player = function(id) {
 	this.graphics.texture = assets.atlas.getSubTexture("PlayerSpaceship");
 	this.addChild(this.graphics.g2d_node);
 	this.addComponent(components.FollowMouseComponent);
-	this.addComponent(components.PlayerShoot);
+	this.addComponent(components.Shoot);
 	this.addComponent(components.PlayerShipComponent);
+	model.ModelLocator.initialize().model.setPlayer(this);
 };
 $hxClasses["entities.Player"] = entities.Player;
 entities.Player.__name__ = ["entities","Player"];
 entities.Player.__super__ = com.genome2d.node.GNode;
 entities.Player.prototype = $extend(com.genome2d.node.GNode.prototype,{
 	__class__: entities.Player
-});
-entities.PlayerBullet = function(registry,texture,_x,_y) {
-	com.genome2d.node.GNode.call(this,"player_bullet");
-	this.g2d_transform.set_x(_x);
-	this.g2d_transform.set_y(_y);
-	this.graphics = com.genome2d.node.factory.GNodeFactory.createNodeWithComponent(com.genome2d.components.renderables.GSprite,"player_bullet_graphic");
-	this.graphics.texture = texture;
-	this.addChild(this.graphics.g2d_node);
-	this.addComponent(components.PlayerBulletComponent);
-	registry.gameState.addChild(this);
-	registry.playerBullets.push(this);
-};
-$hxClasses["entities.PlayerBullet"] = entities.PlayerBullet;
-entities.PlayerBullet.__name__ = ["entities","PlayerBullet"];
-entities.PlayerBullet.__super__ = com.genome2d.node.GNode;
-entities.PlayerBullet.prototype = $extend(com.genome2d.node.GNode.prototype,{
-	__class__: entities.PlayerBullet
 });
 var haxe = {};
 haxe.IMap = function() { };
@@ -4909,11 +5211,83 @@ js.Browser.createXMLHttpRequest = function() {
 	throw "Unable to create XMLHttpRequest object.";
 };
 var model = {};
+model.AppModel = function() {
+	this.playerBullets = new Array();
+	this.enemyBullets = new Array();
+	this.enemies = new Array();
+};
+$hxClasses["model.AppModel"] = model.AppModel;
+model.AppModel.__name__ = ["model","AppModel"];
+model.AppModel.prototype = {
+	createText: function(parent,p_x,p_y,p_textureAtlasId,p_text,w,h,p_vAlign,p_hAlign,p_tracking,p_lineSpace) {
+		if(p_lineSpace == null) p_lineSpace = 0;
+		if(p_tracking == null) p_tracking = 0;
+		var text = com.genome2d.node.factory.GNodeFactory.createNodeWithComponent(com.genome2d.components.renderables.text.GTextureText);
+		text.setTextureAtlas(p_textureAtlasId);
+		text.g2d_autoSize = true;
+		text.g2d_invalidate = true;
+		text.g2d_autoSize;
+		text.g2d_width = w;
+		text.g2d_invalidate = true;
+		text.g2d_width;
+		text.set_height(h);
+		text.g2d_text = p_text;
+		text.g2d_invalidate = true;
+		text.g2d_text;
+		text.g2d_tracking = p_tracking;
+		text.g2d_invalidate = true;
+		text.g2d_tracking;
+		text.g2d_lineSpace = p_lineSpace;
+		text.g2d_invalidate = true;
+		text.g2d_lineSpace;
+		text.g2d_vAlign = p_vAlign;
+		text.g2d_invalidate = true;
+		text.g2d_vAlign;
+		text.g2d_hAlign = p_hAlign;
+		text.g2d_invalidate = true;
+		text.g2d_hAlign;
+		text.g2d_node.g2d_transform.setPosition(p_x,p_y);
+		parent.addChild(text.g2d_node);
+		return text;
+	}
+	,changeState: function(stateClass) {
+		if(this.currentState != null && this.currentState.g2d_parent != null && this.currentState.g2d_parent == this.root) {
+			this.root.removeChild(this.currentState);
+			this.currentState.dispose();
+		}
+		var state = Type.createInstance(stateClass,[]);
+		this.root.addChild(state);
+		this.currentState = state;
+	}
+	,setPlayer: function(_player) {
+		this.player = _player;
+		this.playerComponent = _player.getComponent(components.PlayerShipComponent);
+	}
+	,addEnemy: function(enemy) {
+		this.gameState.addChild(enemy);
+		this.enemies.push(enemy);
+	}
+	,removeEnemy: function(enemy) {
+		this.gameState.removeChild(enemy);
+		HxOverrides.remove(this.enemies,enemy);
+	}
+	,addBullet: function(bullet) {
+		this.gameState.addChild(bullet);
+		if(bullet.owner == model.BulletOwner.PLAYER) this.playerBullets.push(bullet); else if(bullet.owner == model.BulletOwner.ENEMY) this.enemyBullets.push(bullet);
+	}
+	,removeBullet: function(bullet) {
+		this.gameState.removeChild(bullet);
+		if(bullet.owner == model.BulletOwner.PLAYER) HxOverrides.remove(this.playerBullets,bullet); else if(bullet.owner == model.BulletOwner.ENEMY) HxOverrides.remove(this.enemyBullets,bullet);
+	}
+	,__class__: model.AppModel
+};
 model.Assets = function() {
 	this.assetsLoaded = new msignal.Signal0();
 	this._assetManager = new com.genome2d.assets.GAssetManager();
 	this._assetManager.addUrl("atlas_gfx","assets/Atlas.png");
 	this._assetManager.addUrl("atlas_xml","assets/Atlas.xml");
+	this._assetManager.addUrl("font_gfx","assets/font.png");
+	this._assetManager.addUrl("font_xml","assets/font.fnt");
 	this._assetManager.g2d_onAllLoaded.add($bind(this,this._assetsInitializedHandler));
 	this._assetManager.load();
 	console.log("load assets");
@@ -4924,13 +5298,17 @@ model.Assets.prototype = {
 	_assetsInitializedHandler: function() {
 		console.log("assets loaded");
 		this.atlas = com.genome2d.textures.factories.GTextureAtlasFactory.createFromAssets("atlas",this._assetManager.getAssetById("atlas_gfx"),this._assetManager.getAssetById("atlas_xml"));
+		this.font = com.genome2d.textures.factories.GTextureAtlasFactory.createFontFromAssets("font",this._assetManager.getAssetById("font_gfx"),this._assetManager.getAssetById("font_xml"));
 		this.assetsLoaded.dispatch();
 	}
 	,__class__: model.Assets
 };
+model.BulletOwner = function() { };
+$hxClasses["model.BulletOwner"] = model.BulletOwner;
+model.BulletOwner.__name__ = ["model","BulletOwner"];
 model.ModelLocator = function() {
 	this.assets = new model.Assets();
-	this.registry = new model.Registry();
+	this.model = new model.AppModel();
 	if(model.ModelLocator._instance != null) console.log("Error:ModelLocator already initialised.");
 	if(model.ModelLocator._instance == null) model.ModelLocator._instance = this;
 };
@@ -4949,15 +5327,6 @@ model.ModelLocator.prototype = {
 model.MovementTypes = function() { };
 $hxClasses["model.MovementTypes"] = model.MovementTypes;
 model.MovementTypes.__name__ = ["model","MovementTypes"];
-model.Registry = function() {
-	this.enemies = new Array();
-	this.playerBullets = new Array();
-};
-$hxClasses["model.Registry"] = model.Registry;
-model.Registry.__name__ = ["model","Registry"];
-model.Registry.prototype = {
-	__class__: model.Registry
-};
 var msignal = {};
 msignal.Signal = function(valueClasses) {
 	if(valueClasses == null) valueClasses = [];
@@ -5254,10 +5623,10 @@ msignal.SlotList.prototype = {
 	,__properties__: {get_length:"get_length"}
 };
 var states = {};
-states.GameState = function(id) {
-	com.genome2d.node.GNode.call(this,id);
-	var registry = model.ModelLocator.initialize().registry;
-	registry.gameState = this;
+states.GameState = function() {
+	com.genome2d.node.GNode.call(this,"game_state");
+	var model1 = model.ModelLocator.initialize().model;
+	model1.gameState = this;
 	this._player = new entities.Player("player");
 	this.addChild(this._player);
 	this.addComponent(components.EnemySpawner);
@@ -5267,6 +5636,27 @@ states.GameState.__name__ = ["states","GameState"];
 states.GameState.__super__ = com.genome2d.node.GNode;
 states.GameState.prototype = $extend(com.genome2d.node.GNode.prototype,{
 	__class__: states.GameState
+});
+states.StartState = function() {
+	com.genome2d.node.GNode.call(this,"start_state");
+	var assets = model.ModelLocator.initialize().assets;
+	this._model = model.ModelLocator.initialize().model;
+	this._model.createText(this,-50,-260,assets.font,"Genome2D \nSpace-Shooter Tutorial \nHAXE",this._model.viewRect.width,200,1,1,0);
+	var play = com.genome2d.node.factory.GNodeFactory.createNodeWithComponent(com.genome2d.components.renderables.GSprite);
+	play.texture = assets.atlas.getSubTexture("PlayerSpaceship");
+	play.g2d_node.g2d_transform.setPosition(0,0);
+	play.g2d_node.mouseEnabled = true;
+	play.g2d_node.get_onMouseClick().addOnce($bind(this,this._onPlayClick));
+	this.addChild(play.g2d_node);
+};
+$hxClasses["states.StartState"] = states.StartState;
+states.StartState.__name__ = ["states","StartState"];
+states.StartState.__super__ = com.genome2d.node.GNode;
+states.StartState.prototype = $extend(com.genome2d.node.GNode.prototype,{
+	_onPlayClick: function(s) {
+		this._model.changeState(states.GameState);
+	}
+	,__class__: states.StartState
 });
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
@@ -5309,6 +5699,8 @@ com.genome2d.components.renderables.GSprite.PROTOTYPE_PROPERTIES = ["textureId|S
 com.genome2d.components.renderables.particles.GSimpleParticle.g2d_instanceCount = 0;
 com.genome2d.components.renderables.particles.GSimpleParticleSystem.__meta__ = { fields : { settings : { prototype : null}}};
 com.genome2d.components.renderables.particles.GSimpleParticleSystem.PROTOTYPE_PROPERTIES = ["settings|String"];
+com.genome2d.components.renderables.text.GTextureText.__meta__ = { fields : { tracking : { prototype : null}, lineSpace : { prototype : null}, vAlign : { prototype : null}, hAlign : { prototype : null}, textureAtlasId : { prototype : null}, text : { prototype : null}, autoSize : { prototype : null}, width : { prototype : null}, height : { prototype : null}}};
+com.genome2d.components.renderables.text.GTextureText.PROTOTYPE_PROPERTIES = ["tracking|Float","lineSpace|Float","vAlign|Int","hAlign|Int","textureAtlasId|String","text|String","autoSize|Bool","width|Float","height|Float"];
 com.genome2d.context.GBlendMode.blendFactors = [[[1,0],[770,771],[770,32970],[32968,771],[770,1],[0,771]],[[1,0],[1,771],[1,1],[32968,771],[1,769],[0,771]]];
 com.genome2d.context.GBlendMode.NONE = 0;
 com.genome2d.context.GBlendMode.NORMAL = 1;
@@ -5348,13 +5740,19 @@ com.genome2d.textures.GTextureSourceType.IMAGE = 0;
 com.genome2d.textures.GTextureType.STANDALONE = 0;
 com.genome2d.textures.GTextureType.SUBTEXTURE = 1;
 com.genome2d.textures.GTextureType.ATLAS = 2;
+com.genome2d.utils.GHAlignType.LEFT = 0;
+com.genome2d.utils.GHAlignType.CENTER = 1;
+com.genome2d.utils.GHAlignType.RIGHT = 2;
+com.genome2d.utils.GVAlignType.TOP = 0;
+com.genome2d.utils.GVAlignType.MIDDLE = 1;
+com.genome2d.utils.GVAlignType.BOTTOM = 2;
 components.BackgroundMovement.PROTOTYPE_PROPERTIES = [];
+components.BulletComponent.PROTOTYPE_PROPERTIES = [];
 components.EnemyShipComponent.PROTOTYPE_PROPERTIES = [];
 components.EnemySpawner.PROTOTYPE_PROPERTIES = [];
 components.FollowMouseComponent.PROTOTYPE_PROPERTIES = [];
-components.PlayerBulletComponent.PROTOTYPE_PROPERTIES = [];
 components.PlayerShipComponent.PROTOTYPE_PROPERTIES = [];
-components.PlayerShoot.PROTOTYPE_PROPERTIES = [];
+components.Shoot.PROTOTYPE_PROPERTIES = [];
 haxe.xml.Parser.escapes = (function($this) {
 	var $r;
 	var h = new haxe.ds.StringMap();
@@ -5368,6 +5766,8 @@ haxe.xml.Parser.escapes = (function($this) {
 	return $r;
 }(this));
 js.Boot.__toStr = {}.toString;
+model.BulletOwner.ENEMY = "enemy_bullet";
+model.BulletOwner.PLAYER = "player_bullet";
 model.MovementTypes.SINUSOIDAL = "sinusoidal_movemen";
 model.MovementTypes.STREIGHT = "streight_movemen";
 Main.main();

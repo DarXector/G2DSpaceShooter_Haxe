@@ -3,7 +3,7 @@ package entities;
 import model.BulletOwner;
 import String;
 import com.genome2d.textures.GTexture;
-import model.Registry;
+import model.AppModel;
 import components.BulletComponent;
 import com.genome2d.node.factory.GNodeFactory;
 import com.genome2d.components.renderables.GSprite;
@@ -14,7 +14,7 @@ class Bullet extends GNode
     public var graphics(default, null):GSprite;
     public var owner(default, null):String;
 
-    public function new(_owner:String, registry:Registry, texture:GTexture, _x:Float, _y:Float)
+    public function new(_owner:String, _model:AppModel, texture:GTexture, _x:Float, _y:Float)
     {
         super('player_bullet');
 
@@ -31,15 +31,8 @@ class Bullet extends GNode
         }
         addChild(graphics.node);
 
-        this.addComponent(BulletComponent);
+        _model.addBullet(this);
 
-        registry.gameState.addChild(this);
-        if(owner == BulletOwner.PLAYER)
-        {
-            registry.playerBullets.push(this);
-        } else
-        {
-            registry.enemyBullets.push(this);
-        }
+        this.addComponent(BulletComponent);
     }
 }

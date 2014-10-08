@@ -1,7 +1,7 @@
 package components;
 
 import com.genome2d.textures.GTexture;
-import model.Registry;
+import model.AppModel;
 import model.ModelLocator;
 import entities.EnemyShip;
 import com.genome2d.components.GComponent;
@@ -10,14 +10,14 @@ class EnemySpawner extends GComponent
 {
     private var _enemySpawnInterval:Int = 60;
     private var _enemySpawnCounter:Int = 60;
-    private var _registry:Registry;
+    private var _model:AppModel;
     private var _texture:GTexture;
 
     public function new()
     {
         super();
 
-        _registry = ModelLocator.instance().registry;
+        _model = ModelLocator.instance().model;
         _texture = ModelLocator.instance().assets.atlas.getSubTexture('EnemySpaceship');
     }
 
@@ -44,6 +44,6 @@ class EnemySpawner extends GComponent
 
     private function _spawnEnemy():Void
     {
-        var e = new EnemyShip(_registry, _texture);
+        var e = new EnemyShip(_model, _texture);
     }
 }

@@ -12,9 +12,9 @@ class GameState extends GNode
     {
         super('game_state');
 
-        var registry = ModelLocator.instance().registry;
+        var model = ModelLocator.instance().model;
 
-        registry.gameState = this;
+        model.gameState = this;
 
 
         _player = new Player('player');
