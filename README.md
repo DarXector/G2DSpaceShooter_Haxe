@@ -16,5 +16,3 @@ https://github.com/pshtif/Genome2D-Core
 https://github.com/pshtif/Genome2D-ContextFlash
 
 https://github.com/pshtif/Genome2D-ContextHTML
-
-The code is not yet commented. This is on my TODO list.
