@@ -4359,7 +4359,6 @@ components.EnemyShipComponent.prototype = $extend(com.genome2d.components.GCompo
 	,__class__: components.EnemyShipComponent
 });
 components.EnemySpawner = function() {
-	this._enemySpawnCounter = 60;
 	this._enemySpawnInterval = 60;
 	com.genome2d.components.GComponent.call(this);
 	this._model = model.ModelLocator.initialize().model;
@@ -4370,6 +4369,7 @@ components.EnemySpawner.__name__ = ["components","EnemySpawner"];
 components.EnemySpawner.__super__ = com.genome2d.components.GComponent;
 components.EnemySpawner.prototype = $extend(com.genome2d.components.GComponent.prototype,{
 	init: function() {
+		this._enemySpawnCounter = this._enemySpawnInterval;
 		((function($this) {
 			var $r;
 			if(com.genome2d.node.GNode.g2d_core == null) com.genome2d.node.GNode.g2d_core = com.genome2d.Genome2D.getInstance();
@@ -4402,7 +4402,7 @@ components.FollowMouseComponent.prototype = $extend(com.genome2d.components.GCom
 	init: function() {
 		com.genome2d.Genome2D.getInstance().getContext().onMouseSignal.add($bind(this,this._onMouse));
 	}
-	,_update: function(dt) {
+	,_update: function(deltaTime) {
 		this.g2d_node.g2d_transform.set_x(this._stage.mouseX - this._viewRect.width / 2);
 		this.g2d_node.g2d_transform.set_y(this._stage.mouseY - this._viewRect.height / 2);
 	}
@@ -4514,7 +4514,6 @@ components.Shoot.__name__ = ["components","Shoot"];
 components.Shoot.__super__ = com.genome2d.components.GComponent;
 components.Shoot.prototype = $extend(com.genome2d.components.GComponent.prototype,{
 	init: function() {
-		if(Type.getClass(this.g2d_node) == entities.Player) this._owner = model.BulletOwner.PLAYER; else this._owner = model.BulletOwner.ENEMY;
 		if(Type.getClass(this.g2d_node) == entities.Player) {
 			this._owner = model.BulletOwner.PLAYER;
 			this._delay = this._intervalTime = 10;
@@ -4550,15 +4549,6 @@ components.Shoot.prototype = $extend(com.genome2d.components.GComponent.prototyp
 		this._delay = this._intervalTime;
 		var b = new entities.Bullet(this._owner,this._model,this._texture,this.g2d_node.g2d_transform.g2d_localX - 10,this.g2d_node.g2d_transform.g2d_localY);
 		var c = new entities.Bullet(this._owner,this._model,this._texture,this.g2d_node.g2d_transform.g2d_localX + 14,this.g2d_node.g2d_transform.g2d_localY);
-	}
-	,_onDestroyed: function() {
-		this.canFire = false;
-		((function($this) {
-			var $r;
-			if(com.genome2d.node.GNode.g2d_core == null) com.genome2d.node.GNode.g2d_core = com.genome2d.Genome2D.getInstance();
-			$r = com.genome2d.node.GNode.g2d_core;
-			return $r;
-		}(this))).get_onUpdate().remove($bind(this,this._update));
 	}
 	,__class__: components.Shoot
 });
@@ -5290,13 +5280,11 @@ model.Assets = function() {
 	this._assetManager.addUrl("font_xml","assets/font.fnt");
 	this._assetManager.g2d_onAllLoaded.add($bind(this,this._assetsInitializedHandler));
 	this._assetManager.load();
-	console.log("load assets");
 };
 $hxClasses["model.Assets"] = model.Assets;
 model.Assets.__name__ = ["model","Assets"];
 model.Assets.prototype = {
 	_assetsInitializedHandler: function() {
-		console.log("assets loaded");
 		this.atlas = com.genome2d.textures.factories.GTextureAtlasFactory.createFromAssets("atlas",this._assetManager.getAssetById("atlas_gfx"),this._assetManager.getAssetById("atlas_xml"));
 		this.font = com.genome2d.textures.factories.GTextureAtlasFactory.createFontFromAssets("font",this._assetManager.getAssetById("font_gfx"),this._assetManager.getAssetById("font_xml"));
 		this.assetsLoaded.dispatch();
@@ -5625,8 +5613,7 @@ msignal.SlotList.prototype = {
 var states = {};
 states.GameState = function() {
 	com.genome2d.node.GNode.call(this,"game_state");
-	var model1 = model.ModelLocator.initialize().model;
-	model1.gameState = this;
+	model.ModelLocator.initialize().model.gameState = this;
 	this._player = new entities.Player("player");
 	this.addChild(this._player);
 	this.addComponent(components.EnemySpawner);
@@ -5653,7 +5640,7 @@ $hxClasses["states.StartState"] = states.StartState;
 states.StartState.__name__ = ["states","StartState"];
 states.StartState.__super__ = com.genome2d.node.GNode;
 states.StartState.prototype = $extend(com.genome2d.node.GNode.prototype,{
-	_onPlayClick: function(s) {
+	_onPlayClick: function(e) {
 		this._model.changeState(states.GameState);
 	}
 	,__class__: states.StartState

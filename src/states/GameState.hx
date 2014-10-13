@@ -1,4 +1,11 @@
 package states;
+
+/**
+ * Game screen state
+ * .
+ * @author Marko Ristic
+ */
+
 import components.EnemySpawner;
 import model.ModelLocator;
 import entities.Player;
@@ -12,14 +19,14 @@ class GameState extends GNode
     {
         super('game_state');
 
-        var model = ModelLocator.instance().model;
+        // Reference Game state inside app model
+        ModelLocator.instance().model.gameState = this;
 
-        model.gameState = this;
-
-
+        // Instantiate Player Ship
         _player = new Player('player');
         addChild(_player);
 
+        // Add Component that controls enemy instantiation
         this.addComponent(EnemySpawner);
     }
 }

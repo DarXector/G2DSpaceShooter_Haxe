@@ -1,5 +1,11 @@
 package entities;
 
+/**
+ * Player Ship entity
+ * .
+ * @author Marko Ristic
+ */
+
 import components.Shoot;
 import components.PlayerShipComponent;
 import model.ModelLocator;
@@ -23,6 +29,7 @@ class Player extends GNode
 
         var assets = ModelLocator.instance().assets;
 
+        // Create the particle emmiter taht will represent our engine exhaust
         booster = cast GNodeFactory.createNodeWithComponent(GSimpleParticleSystem, 'booster_emitter');
         booster.texture = assets.atlas.getSubTexture("Particle");
         booster.emit = true;
@@ -47,18 +54,20 @@ class Player extends GNode
         booster.endGreen = 2;
         booster.endRed = 4;
 
-        booster.node.transform.setPosition(0,30);
+        booster.node.transform.setPosition(0,30); // move it to back of the ship
 
         addChild(booster.node);
 
+        // add player ship graphic
         graphics = cast GNodeFactory.createNodeWithComponent(GSprite, 'player_graphics');
         graphics.texture = assets.atlas.getSubTexture('PlayerSpaceship');
         addChild(graphics.node);
 
-        this.addComponent(FollowMouseComponent);
-        this.addComponent(Shoot);
-        this.addComponent(PlayerShipComponent);
+        this.addComponent(FollowMouseComponent); // Player ship should be able to follow the mouse
+        this.addComponent(Shoot); // Should be able to shoot
+        this.addComponent(PlayerShipComponent); // Adding component that controls interaxtion with other entities
 
+        // Reference the player ship inside our app model
         ModelLocator.instance().model.setPlayer(this);
     }
 }

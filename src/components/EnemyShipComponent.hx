@@ -1,5 +1,11 @@
 package components;
 
+/**
+ * Component controlling Enemy ship movement and interaction with other elements
+ * .
+ * @author Marko Ristic
+ */
+
 import model.MovementTypes;
 import com.genome2d.geom.GRectangle;
 import model.Assets;
@@ -37,12 +43,19 @@ class EnemyShipComponent extends GComponent
     override public function init():Void
     {
         _parentShip = cast node;
-        _initX = node.transform.x;
+        _initX = node.transform.x; // cache the initial value of the Enemy x position
         node.core.onUpdate.add(_update);
     }
 
+    /**
+    * Moving the Enemy and checking for interactions with other game elements.
+    * @param deltaTime elapsed from the last frame
+    */
     private function _update(deltaTime:Float):Void
     {
+
+        // Due to a strange issue with HTML5 target where the initial stage is not centered like in Flash target
+        // we need to adjust the position of this node when checking for Hit Testing when targeting HTML5
 
         #if flash
         var nodeX = node.transform.x;
@@ -52,25 +65,30 @@ class EnemyShipComponent extends GComponent
         var nodeY = node.transform.y + _viewRect.height / 2;
         #end
 
-        if(!_exploding)
+        if(!_exploding) // don't check collisions if the enemy is already hit
         {
-            for(bullet in _model.playerBullets)
+            for(bullet in _model.playerBullets) // check for all the active bullet
             {
+                // if bullet is colliding with an improvised box collider if enemy (nodeX, nodeY, false, 20, 20)
                 if(bullet.graphics.hitTestPoint(nodeX, nodeY, false, 20, 20))
                 {
-                    cast(bullet.getComponent(BulletComponent), BulletComponent).remove();
-                    explode();
+                    cast(bullet.getComponent(BulletComponent), BulletComponent).remove(); // remove the bullet
+                    explode(); // explode the enemy
                 }
             }
         }
 
+        // Check player collision with improvised box collider if enemy (nodeX, nodeY, false, 20, 20)
+        // Ignore if the player or enemy are already hit
         if(!_exploding && !_model.playerComponent.exploding
         && _model.player.graphics.hitTestPoint(nodeX, nodeY, false, 20, 20))
         {
-            _model.playerComponent.explode();
-            explode();
+            _model.playerComponent.explode(); // explode the player
+            explode(); // explode the enemy
         }
 
+        // Moevement either straight or sinusoidal
+        // TODO: Move both streight and sinusoidal movements to seperate components
         node.transform.y += _speed * deltaTime;
         if(_parentShip.movementType == MovementTypes.SINUSOIDAL)
         {
@@ -78,6 +96,7 @@ class EnemyShipComponent extends GComponent
             //_amplitude *= 0.95;
         }
 
+        // If exploding wait for it to finish and remove the enemy
         if(_exploding)
         {
             _explodeDelay--;
@@ -88,6 +107,7 @@ class EnemyShipComponent extends GComponent
             }
         }
 
+        // Remove enemy when it leaves camera view
         if(node.transform.y > _viewRect.height / 2 + 100)
         {
             remove();
@@ -98,18 +118,22 @@ class EnemyShipComponent extends GComponent
     {
         _model.removeEnemy(cast this.node);
 
-        cast(node.getComponent(Shoot), Shoot).canFire = false;
+        cast(node.getComponent(Shoot), Shoot).canFire = false; // Dead enemies can't shoot
         node.core.onUpdate.remove(_update);
         node.dispose();
     }
+
+    /**
+    * Explosion logic. Adding a simple Particle emitter that simulates explosion
+    */
 
     public function explode():Void
     {
         if(_exploding) return;
 
         _exploding = true;
-        cast(node, EnemyShip).graphics.node.transform.visible = false;
-        cast(node.getComponent(Shoot), Shoot).canFire = false;
+        cast(node, EnemyShip).graphics.node.transform.visible = false; // Hide enemy graphic
+        cast(node.getComponent(Shoot), Shoot).canFire = false; // Dead enemies can't shoot
 
         if(_explosionEmitter == null)
         {
@@ -119,16 +143,20 @@ class EnemyShipComponent extends GComponent
             _explosionEmitter.emit = true;
             _explosionEmitter.useWorldSpace = true;
 
+            // Just setting some emission properties.
+            // Just play around with the values untli it looks right
             _explosionEmitter.emission = 64;
             _explosionEmitter.energy = 0.5;
             _explosionEmitter.energyVariance = 0.2;
-            _explosionEmitter.dispersionAngleVariance = Math.PI*2;
+            _explosionEmitter.dispersionAngleVariance = Math.PI*2; // Particles are emitted in a 360 deg angle
             _explosionEmitter.initialVelocity = 80;
             _explosionEmitter.initialVelocityVariance = 80;
             _explosionEmitter.initialScale = 0.7;
             _explosionEmitter.initialScaleVariance = 0.3;
             _explosionEmitter.endScale = 0.2;
             _explosionEmitter.endScaleVariance = 0.1;
+
+            // Changing colors from emission to death
             _explosionEmitter.initialAlpha = 1;
             _explosionEmitter.initialBlue = 4;
             _explosionEmitter.initialGreen = 1;
@@ -137,6 +165,7 @@ class EnemyShipComponent extends GComponent
             _explosionEmitter.endBlue = 5;
             _explosionEmitter.endGreen = 2;
             _explosionEmitter.endRed = 3;
+
             node.addChild(_explosionEmitter.node);
         }
     }

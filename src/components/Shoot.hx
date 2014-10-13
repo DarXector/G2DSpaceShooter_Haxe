@@ -1,5 +1,11 @@
 package components;
 
+/**
+* Component controlling Player and Enemy shooting
+* .
+* @author Marko Ristic
+*/
+
 import entities.Bullet;
 import model.BulletOwner;
 import entities.Player;
@@ -32,8 +38,9 @@ class Shoot extends GComponent
 
     override public function init():Void
     {
-        _owner = Type.getClass(node) == Player? BulletOwner.PLAYER : BulletOwner.ENEMY;
 
+        // Get weather the node this component is attached to is Player or Enemy
+        // And set shot interval and delay properties depending on that
         if(Type.getClass(node) == Player)
         {
             _owner = BulletOwner.PLAYER;
@@ -52,6 +59,12 @@ class Shoot extends GComponent
         node.core.onUpdate.add(_update);
     }
 
+    /**
+    * Check when the player has pressed or released the mouse button
+    * @param e GMouseSignal
+    * When mouse is down Shoot.
+    */
+
     private function _onMouse(e:GMouseSignal):Void
     {
         switch e.type
@@ -63,6 +76,11 @@ class Shoot extends GComponent
         }
     }
 
+    /**
+    * When the delay time between shots has passed shoot
+    * @param deltaTime elapsed from the last frame
+    */
+
     private function _update(deltaTime:Float):Void
     {
         if(_delay >0)
@@ -71,6 +89,8 @@ class Shoot extends GComponent
         }
         else
         {
+            // Check weather the entity is enemy. If not it is the player. Then check if the mous is down.
+            // Make shure that this entity can shoot
             if((_owner == BulletOwner.ENEMY || _mouseDown) && canFire)
             {
                 _shoot();
@@ -80,15 +100,18 @@ class Shoot extends GComponent
 
     private function _shoot():Void
     {
+        // REset the timer
         _delay = _intervalTime;
 
+        // Instantiate bullets
         var b = new Bullet(_owner, _model, _texture, this.node.transform.x - 10, this.node.transform.y);
         var c = new Bullet(_owner, _model, _texture, this.node.transform.x + 14, this.node.transform.y);
     }
 
-    private function _onDestroyed():Void
+
+    /*private function _onDestroyed():Void
     {
         canFire = false;
         node.core.onUpdate.remove(_update);
-    }
+    }*/
 }

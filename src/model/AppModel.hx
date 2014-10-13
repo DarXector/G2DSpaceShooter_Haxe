@@ -1,6 +1,7 @@
 package model;
 /**
- * ...
+ * Model class used for handling data manipulation, object pools and some utilities
+ * .
  * @author Marko Ristic
  */
 import com.genome2d.textures.GTextureFontAtlas;
@@ -20,9 +21,12 @@ class AppModel
     public var root:GNode;
     public var gameState:GameState;
 
+    // Object pools for bullets and entitites
     public var playerBullets(default, null):Array<Bullet>;
     public var enemyBullets(default, null):Array<Bullet>;
     public var enemies(default, null):Array<EnemyShip>;
+
+
     public var player(default, null):Player;
     public var playerComponent(default, null):PlayerShipComponent;
     public var currentState(default, null):GNode;
@@ -34,6 +38,10 @@ class AppModel
         enemies = new Array<EnemyShip>();
 	}
 
+    /**
+     * Utility method Text creation using Bitmap Fonts.
+     * Taken from Genome2D examples and slightly edited
+    */
     public function createText(parent:GNode, p_x:Float, p_y:Float, p_textureAtlasId:GTextureFontAtlas, p_text:String, w:Float, h:Float, p_vAlign:Int, p_hAlign:Int, p_tracking:Int = 0, p_lineSpace:Int = 0):GTextureText
     {
         var text:GTextureText = cast GNodeFactory.createNodeWithComponent(GTextureText);
@@ -52,6 +60,11 @@ class AppModel
         return text;
     }
 
+    /**
+     * Change current screen state
+     * @param stateClass Class of the next screen state (GNode)
+    */
+
     public function changeState(stateClass:Class<GNode>):Void
     {
         if(currentState != null && currentState.parent != null && currentState.parent == root)
@@ -65,11 +78,21 @@ class AppModel
         currentState = state;
     }
 
+    /**
+     * Set player object. Used for referencing througth the code
+     * @param _player Player instance
+    */
+
     public function setPlayer(_player:Player):Void
     {
         player = _player;
         playerComponent = cast _player.getComponent(PlayerShipComponent);
     }
+
+    /**
+     * Place enemy instance inside enemies pool
+     * @param enemy Enemy instance
+    */
 
     public function addEnemy(enemy:EnemyShip):Void
     {
@@ -77,11 +100,21 @@ class AppModel
         enemies.push(enemy);
     }
 
+    /**
+     * Remove enemy instance from enemies pool
+     * @param enemy Enemy instance
+    */
+
     public function removeEnemy(enemy:EnemyShip):Void
     {
         gameState.removeChild(enemy);
         enemies.remove(enemy);
     }
+
+    /**
+     * Add bullet instance to bullets (Enemy or Player bullets) pool
+     * @param bullet Bullet instance
+    */
 
     public function addBullet(bullet:Bullet):Void
     {
@@ -94,6 +127,11 @@ class AppModel
             enemyBullets.push(bullet);
         }
     }
+
+    /**
+     * Remove bullet instance from bullets pool
+     * @param bullet Bullet instance
+    */
 
     public function removeBullet(bullet:Bullet):Void
     {

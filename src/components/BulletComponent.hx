@@ -1,5 +1,12 @@
 package components;
 
+/**
+ * Component controlling bullet movement
+ * .
+ * @author Marko Ristic
+ */
+
+
 import model.BulletOwner;
 import entities.Bullet;
 import com.genome2d.geom.GRectangle;
@@ -29,12 +36,21 @@ class BulletComponent extends GComponent
         node.core.onUpdate.add(_update);
     }
 
+    /**
+    * Moving the bullet along the Y axes.
+    * If player shot, upward
+    * If Enemy shot, downward
+    * @param deltaTime elapsed from the last frame
+    */
+
     private function _update(deltaTime:Float):Void
     {
         if(node == null) return;
         if(_owner == BulletOwner.PLAYER)
         {
-            node.transform.y -= _speed * deltaTime;
+            node.transform.y -= _speed * deltaTime; // speed times delta time to make a smooth movement regardless od FPS
+
+            // When the bullet exits the camera view remove it from the stage and pool.
             if(node.transform.y < -_viewRect.height / 2 - 50)
             {
                 remove();
@@ -53,6 +69,7 @@ class BulletComponent extends GComponent
     {
         _model.removeBullet(cast this.node);
 
+        // Kill the update method. can create issues if this is not removed.
         node.core.onUpdate.remove(_update);
         node.dispose();
     }

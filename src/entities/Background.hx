@@ -1,4 +1,11 @@
 package entities;
+
+/**
+ * Background node
+ * .
+ * @author Marko Ristic
+ */
+
 import components.BackgroundMovement;
 import model.ModelLocator;
 import com.genome2d.node.factory.GNodeFactory;
@@ -17,6 +24,8 @@ class Background extends GNode
         var assets = ModelLocator.instance().assets;
         var model = ModelLocator.instance().model;
 
+        // Adding graphic from Sprite Atlas
+        // Using two same graphic in order to fake endless scrolling
         graphics1 = cast GNodeFactory.createNodeWithComponent(GSprite, 'bg_graphics');
         graphics1.texture = assets.atlas.getSubTexture('Background');
         addChild(graphics1.node);
@@ -27,6 +36,7 @@ class Background extends GNode
 
         graphics2.node.transform.y = -model.viewRect.height;
 
+        // Add component for controling background movememnt
         addComponent(BackgroundMovement);
     }
 }
