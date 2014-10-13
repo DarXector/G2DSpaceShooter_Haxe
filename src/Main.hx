@@ -41,10 +41,11 @@ class Main
         _initGenome();
     }
 
-/**
+    /**
         Initialize Genome2D
      **/
     private function _initGenome():Void {
+
         var config = new GContextConfig(new GRectangle(0, 0, 480, 640));
         #if stage3Donly
         config.profile = Vector.ofArray(["baselineExtended", "baseline"]);
@@ -56,14 +57,16 @@ class Main
         _genome.init(config);
     }
 
-/**
+    /**
         Genome2D initialized handler
      **/
     private function _initialized():Void
     {
         trace("G2D is initialized");
 
+        // reference stage view rect and in the same time initialise our model locator and models
         ModelLocator.instance().model.viewRect = cast _genome.getContext().getStageViewRect();
+        // Wait for assets to be loaded
         ModelLocator.instance().assets.assetsLoaded.addOnce(_assetReady);
     }
 
@@ -71,21 +74,27 @@ class Main
     {
         trace("Assets ready!");
 
+        // Add the main Node container
         var container:GNode = GNodeFactory.createNode("container");
         ModelLocator.instance().model.root = container;
 
+        // When targeting HTML5 there is abug where the stage registration point is not centered as with Flash target
+        // So we manually center the container
         #if flash
         #else
         container.transform.x = _genome.getContext().getStageViewRect().width / 2;
         container.transform.y = _genome.getContext().getStageViewRect().height / 2;
         #end
 
+        // Adding camera node
         var camera:GCameraController = cast container.addComponent(GCameraController);
         _genome.root.addChild(container);
 
+        // Adding the background node
         var bg:Background = new Background();
         container.addChild(bg);
 
+        // Show the Start Screen State
         ModelLocator.instance().model.changeState(StartState);
     }
 
